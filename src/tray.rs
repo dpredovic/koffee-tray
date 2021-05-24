@@ -1,7 +1,9 @@
 use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
 use ksni::Tray;
 
-use crate::inhibitors::{DpmsInhibitor, Inhibitor, ScreenSaverInhibitor};
+use crate::inhibitors::dpms::DpmsInhibitor;
+use crate::inhibitors::screen_saver::ScreenSaverInhibitor;
+use crate::inhibitors::Inhibitor;
 
 pub struct KoffeeTray {
     pub(crate) on: bool,
@@ -46,14 +48,16 @@ impl Tray for KoffeeTray {
                 checked: self.on,
                 activate: Box::new(|this: &mut Self| this.switch()),
                 ..Default::default()
-            }.into(),
+            }
+            .into(),
             MenuItem::Sepatator,
             StandardItem {
                 label: "Exit".into(),
                 icon_name: "application-exit".into(),
                 activate: Box::new(|_| std::process::exit(0)),
                 ..Default::default()
-            }.into(),
+            }
+            .into(),
         ]
     }
 }

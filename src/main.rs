@@ -2,13 +2,11 @@ use ksni::TrayService;
 
 use crate::tray::KoffeeTray;
 
-mod tray;
 mod inhibitors;
+mod tray;
 
 fn main() {
-    let service = TrayService::new(KoffeeTray {
-        on: false
-    });
+    let service = TrayService::new(KoffeeTray { on: false });
     service.spawn();
 
     loop {
