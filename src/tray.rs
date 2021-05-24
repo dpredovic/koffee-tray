@@ -1,20 +1,26 @@
 use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
 use ksni::Tray;
 
-use crate::inhibitors::dpms::DpmsInhibitor;
-use crate::inhibitors::screen_saver::ScreenSaverInhibitor;
 use crate::inhibitors::Inhibitor;
 
-pub struct KoffeeTray {
+pub(crate) struct KoffeeTray {
     pub(crate) on: bool,
+    pub(crate) inhibitors: Vec<Box<dyn Inhibitor>>,
 }
 
 impl KoffeeTray {
     fn switch(&mut self) {
         self.on = !self.on;
 
-        ScreenSaverInhibitor::set_inhibit_state(self.on);
-        DpmsInhibitor::set_inhibit_state(self.on);
+        for i in self.inhibitors.iter_mut() {
+            let result = i.set_inhibit_state(self.on);
+            match result {
+                Ok(_) => {}
+                Err(err) => {
+                    println!("error: {}", err)
+                }
+            }
+        }
     }
 }
 
