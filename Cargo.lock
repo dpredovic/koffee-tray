@@ -133,7 +133,7 @@ dependencies = [
 
 [[package]]
 name = "koffee-tray"
-version = "0.1.1-SNAPSHOT"
+version = "0.1.1-dev"
 dependencies = [
  "anyhow",
  "dbus",

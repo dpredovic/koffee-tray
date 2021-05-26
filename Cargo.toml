@@ -1,9 +1,14 @@
 [package]
 name = "koffee-tray"
-version = "0.1.1-SNAPSHOT"
+version = "0.1.1-dev"
 authors = ["dpredovic <dpredovic@gmail.com>"]
 edition = "2018"
 build = "build.rs"
+description = "A very lightweight Caffeine replacement, written in Rust"
+homepage = "https://github.com/dpredovic/koffee-tray"
+repository = "https://github.com/dpredovic/koffee-tray"
+license = "GPL"
+publish = false
 
 [dependencies]
 ksni = "0.1.3"

@@ -2,6 +2,7 @@ use anyhow::anyhow;
 use anyhow::Result;
 use ksni::TrayService;
 use log::info;
+use std::env;
 
 mod inhibitors;
 mod tray;
@@ -9,13 +10,18 @@ mod tray;
 fn main() -> Result<()> {
     logging::setup_logging();
 
-    let service = TrayService::new(tray::Koffee {
-        on: false,
+    let args: Vec<String> = env::args().collect();
+    let on_startup = args.contains(&("-i".into()));
+
+    let koffee = tray::Koffee {
+        on: on_startup,
         inhibitors: vec![
             Box::new(inhibitors::xdg::power_management::Inhibitor::new()?),
             Box::new(inhibitors::xdg::screen_saver::Inhibitor::new()?),
         ],
-    });
+    };
+    let service = TrayService::new(koffee);
+
     info!("Koffee-Tray service starting");
     service.run().map_err(|e| anyhow!(e))
 }
