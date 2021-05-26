@@ -1,101 +1,128 @@
-use std::error;
-
-type Result<T> = std::result::Result<T, Box<dyn error::Error>>;
+use anyhow::Result;
 
 pub trait Inhibitor {
     fn set_inhibit_state(&mut self, state: bool) -> Result<()>;
 }
 
-pub(crate) mod dpms {
-    use std::process::Command;
+pub mod xdg {
+    use anyhow::Result;
+    use dbus::blocking::LocalConnection;
 
-    pub(crate) struct DpmsInhibitor;
-
-    impl super::Inhibitor for DpmsInhibitor {
-        fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
-            let arg = if state { "xset -dpms" } else { "xset +dpms" };
-            let result = Command::new("sh").arg("-c").arg(arg).output()?;
-            println!("Dpms set to {}: {}", state, result.status);
-            Ok(())
-        }
-    }
-}
-
-pub(crate) mod screen_saver {
-    use std::process::Command;
-
-    pub struct ScreenSaverInhibitor;
-
-    impl super::Inhibitor for ScreenSaverInhibitor {
-        fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
-            let arg = if state { "xset s off" } else { "xset s on" };
-            let result = Command::new("sh").arg("-c").arg(arg).output()?;
-            println!("Screen saver set to {}: {}", state, result.status);
-            Ok(())
-        }
-    }
-}
-
-pub(crate) mod xdg_pm {
-    use std::time::Duration;
-
-    use blocking::Proxy;
-    use dbus::blocking;
-
-    trait OrgFreedesktopPowerManagementInhibit {
-        fn inhibit(&self, application: &str, reason: &str) -> Result<u32, dbus::Error>;
-        fn un_inhibit(&self, cookie: u32) -> Result<(), dbus::Error>;
-        fn has_inhibit(&self) -> Result<bool, dbus::Error>;
-    }
-
-    impl<'a, T: blocking::BlockingSender, C: ::std::ops::Deref<Target = T>>
-        OrgFreedesktopPowerManagementInhibit for Proxy<'a, C>
-    {
-        fn inhibit(&self, application: &str, reason: &str) -> Result<u32, dbus::Error> {
-            self.method_call(
-                "org.freedesktop.PowerManagement.Inhibit",
-                "Inhibit",
-                (application, reason),
-            )
-            .and_then(|r: (u32,)| Ok(r.0))
-        }
-
-        fn un_inhibit(&self, cookie: u32) -> Result<(), dbus::Error> {
-            self.method_call(
-                "org.freedesktop.PowerManagement.Inhibit",
-                "UnInhibit",
-                (cookie,),
-            )
-        }
-
-        fn has_inhibit(&self) -> Result<bool, dbus::Error> {
-            self.method_call("org.freedesktop.PowerManagement.Inhibit", "HasInhibit", ())
-                .and_then(|r: (bool,)| Ok(r.0))
-        }
-    }
-
-    pub(crate) struct XdgPowerManagement {
+    pub struct Inhibitor {
         pub(crate) cookie: Option<u32>,
+        conn: LocalConnection,
     }
 
-    impl super::Inhibitor for XdgPowerManagement {
-        fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
-            let conn = blocking::Connection::new_session()?;
-            let proxy = conn.with_proxy(
-                "org.freedesktop.PowerManagement",
-                "/org/freedesktop/PowerManagement/Inhibit",
-                Duration::from_millis(200),
-            );
-            if state {
-                let cookie = proxy.inhibit("Koffee-Tray", "Inhibition requested by user")?;
-                self.cookie = Some(cookie);
-                println!("xdg pm inhibited, cookie={}", cookie)
-            } else {
-                let cookie = self.cookie.unwrap();
-                proxy.un_inhibit(cookie)?;
-                println!("xdg pm uninhibited, cookie={}", cookie)
+    impl Inhibitor {
+        pub(crate) fn new() -> Result<Self> {
+            let connection = LocalConnection::new_session()?;
+            Ok(Self {
+                cookie: None,
+                conn: connection,
+            })
+        }
+    }
+
+    pub mod power_management {
+        use anyhow::anyhow;
+        use anyhow::Result;
+        use gen::OrgFreedesktopPowerManagementInhibit;
+        use log::info;
+        use std::time::Duration;
+
+        #[allow(clippy::all)]
+        mod gen {
+            include!(concat!(env!("OUT_DIR"), "/xdg_power_management.rs"));
+        }
+
+        pub struct Inhibitor {
+            xdg: super::Inhibitor,
+        }
+
+        impl Inhibitor {
+            pub(crate) fn new() -> Result<Self> {
+                Ok(Self {
+                    xdg: super::Inhibitor::new()?,
+                })
             }
-            Ok(())
+        }
+
+        impl crate::inhibitors::Inhibitor for Inhibitor {
+            fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
+                let proxy = self.xdg.conn.with_proxy(
+                    "org.freedesktop.PowerManagement.Inhibit",
+                    "/org/freedesktop/PowerManagement/Inhibit",
+                    Duration::from_millis(200),
+                );
+                if state {
+                    let cookie = proxy.inhibit("Koffee-Tray", "Inhibition requested by user")?;
+                    self.xdg.cookie = Some(cookie);
+                    info!("xdg PowerManagement inhibited, cookie={}", cookie);
+                    Ok(())
+                } else {
+                    match self.xdg.cookie {
+                        Some(cookie) => {
+                            proxy.un_inhibit(cookie)?;
+                            self.xdg.cookie = None;
+                            info!("xdg PowerManagement uninhibited, cookie={}", cookie);
+                            Ok(())
+                        }
+                        None => Err(anyhow!("cookie is None!?")),
+                    }
+                }
+            }
+        }
+    }
+
+    pub mod screen_saver {
+        use anyhow::anyhow;
+        use anyhow::Result;
+        use log::info;
+        use std::time::Duration;
+
+        use gen::OrgFreedesktopScreenSaver;
+
+        #[allow(clippy::all)]
+        mod gen {
+            include!(concat!(env!("OUT_DIR"), "/xdg_screen_saver.rs"));
+        }
+
+        pub struct Inhibitor {
+            xdg: super::Inhibitor,
+        }
+
+        impl Inhibitor {
+            pub(crate) fn new() -> Result<Self> {
+                Ok(Self {
+                    xdg: super::Inhibitor::new()?,
+                })
+            }
+        }
+
+        impl crate::inhibitors::Inhibitor for Inhibitor {
+            fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
+                let proxy = self.xdg.conn.with_proxy(
+                    "org.freedesktop.ScreenSaver",
+                    "/ScreenSaver",
+                    Duration::from_millis(200),
+                );
+                if state {
+                    let cookie = proxy.inhibit("Koffee-Tray", "Inhibition requested by user")?;
+                    self.xdg.cookie = Some(cookie);
+                    info!("xdg ScreenSaver inhibited, cookie={}", cookie);
+                    Ok(())
+                } else {
+                    match self.xdg.cookie {
+                        Some(cookie) => {
+                            proxy.un_inhibit(cookie)?;
+                            self.xdg.cookie = None;
+                            info!("xdg ScreenSaver uninhibited, cookie={}", cookie);
+                            Ok(())
+                        }
+                        None => Err(anyhow!("cookie is None?!")),
+                    }
+                }
+            }
         }
     }
 }

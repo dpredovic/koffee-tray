@@ -1,30 +1,28 @@
 use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
 use ksni::Tray;
+use log::error;
 
 use crate::inhibitors::Inhibitor;
 
-pub(crate) struct KoffeeTray {
+pub struct Koffee {
     pub(crate) on: bool,
     pub(crate) inhibitors: Vec<Box<dyn Inhibitor>>,
 }
 
-impl KoffeeTray {
+impl Koffee {
     fn switch(&mut self) {
         self.on = !self.on;
 
-        for i in self.inhibitors.iter_mut() {
+        for i in &mut self.inhibitors {
             let result = i.set_inhibit_state(self.on);
-            match result {
-                Ok(_) => {}
-                Err(err) => {
-                    println!("error: {}", err)
-                }
+            if let Err(err) = result {
+                error!("error: {}", err)
             }
         }
     }
 }
 
-impl Tray for KoffeeTray {
+impl Tray for Koffee {
     fn activate(&mut self, _x: i32, _y: i32) {
         self.switch();
     }
@@ -52,8 +50,8 @@ impl Tray for KoffeeTray {
                 enabled: true,
                 visible: true,
                 checked: self.on,
-                activate: Box::new(|this: &mut Self| this.switch()),
-                ..Default::default()
+                activate: Box::new(Self::switch),
+                ..ksni::menu::CheckmarkItem::default()
             }
             .into(),
             MenuItem::Sepatator,
@@ -61,7 +59,7 @@ impl Tray for KoffeeTray {
                 label: "Exit".into(),
                 icon_name: "application-exit".into(),
                 activate: Box::new(|_| std::process::exit(0)),
-                ..Default::default()
+                ..ksni::menu::StandardItem::default()
             }
             .into(),
         ]
