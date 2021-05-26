@@ -1,6 +1,6 @@
 [package]
 name = "koffee-tray"
-version = "0.1.1-dev"
+version = "0.1.1"
 authors = ["dpredovic <dpredovic@gmail.com>"]
 edition = "2018"
 build = "build.rs"
