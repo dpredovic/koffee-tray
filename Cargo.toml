@@ -17,3 +17,9 @@ log = "0.4.14"
 syslog = "5.0.0"
 simple_logger = "1.11.0"
 anyhow = "1.0.40"
+rust-embed = { version = "5.9.0", features = ["interpolate-folder-path"] }
+
+[build-dependencies]
+image = "0.23.14"
+bincode2 = "2.0.1"
+serde = { version = "1.0.126", features = ["derive"] }

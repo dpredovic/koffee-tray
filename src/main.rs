@@ -1,8 +1,11 @@
+use std::env;
+
 use anyhow::anyhow;
 use anyhow::Result;
 use ksni::TrayService;
 use log::info;
-use std::env;
+
+use crate::tray::Koffee;
 
 mod inhibitors;
 mod tray;
@@ -14,16 +17,15 @@ fn main() -> Result<()> {
     info!("Koffee-Tray v{}", VERSION);
 
     let args: Vec<String> = env::args().collect();
-    let on_startup = args.contains(&("-i".into()));
 
-    let koffee = tray::Koffee {
-        on: on_startup,
-        inhibitors: vec![
-            Box::new(inhibitors::xdg::power_management::Inhibitor::new()?),
-            Box::new(inhibitors::xdg::screen_saver::Inhibitor::new()?),
-        ],
-    };
-    let service = TrayService::new(koffee);
+    let koffee = tray::Koffee::new();
+    let service: TrayService<Koffee> = TrayService::new(koffee);
+    let handle = service.handle();
+
+    let on_startup = args.contains(&("-i".into()));
+    if on_startup {
+        handle.update(tray::Koffee::switch);
+    }
 
     info!("Service starting");
     service.run().map_err(|e| anyhow!(e))

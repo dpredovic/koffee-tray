@@ -1,10 +1,12 @@
-use std::env;
 use std::process::Command;
+use std::{env, fs};
 
-fn main() -> Result<(), std::io::Error> {
+use serde::Serialize;
+
+fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
 
-    Command::new("fish")
+    let status = Command::new("fish")
         .args(&[
             "-c",
             &format!(
@@ -17,9 +19,11 @@ fn main() -> Result<(), std::io::Error> {
                 out_dir
             ),
         ])
-        .status()?;
+        .status()
+        .unwrap();
+    assert!(status.success(), "status code = {}", status.code().unwrap());
 
-    Command::new("fish")
+    let status = Command::new("fish")
         .args(&[
             "-c",
             &format!(
@@ -35,7 +39,28 @@ fn main() -> Result<(), std::io::Error> {
         ])
         .status()
         .unwrap();
+    assert!(status.success(), "status code = {}", status.code().unwrap());
+
+    serialize_image("on", out_dir.as_ref());
+    serialize_image("off", out_dir.as_ref());
 
     println!("cargo:rerun-if-changed=build.rs");
-    Ok(())
+}
+
+fn serialize_image(input: &str, out_dir: &str) {
+    let image = image::open(format!("assets/{}.png", input)).unwrap();
+    let image = image.as_rgba8().unwrap();
+    let image = image.as_flat_samples();
+    let image = ImageData {
+        has_alpha: 1,
+        data: image.samples,
+    };
+    let file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
+    bincode2::serialize_into(file, &image).unwrap();
+}
+
+#[derive(Serialize, Debug)]
+struct ImageData<'a> {
+    has_alpha: u8,
+    data: &'a [u8],
 }

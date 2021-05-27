@@ -1,8 +1,14 @@
 use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
-use ksni::Tray;
+use ksni::{Icon, Tray};
 use log::error;
+use rust_embed::RustEmbed;
 
+use crate::inhibitors;
 use crate::inhibitors::Inhibitor;
+
+#[derive(RustEmbed)]
+#[folder = "$OUT_DIR"]
+struct Asset;
 
 pub struct Koffee {
     pub(crate) on: bool,
@@ -10,7 +16,17 @@ pub struct Koffee {
 }
 
 impl Koffee {
-    fn switch(&mut self) {
+    pub(crate) fn new() -> Self {
+        Self {
+            on: false,
+            inhibitors: vec![
+                Box::new(inhibitors::xdg::power_management::Inhibitor::new().unwrap()),
+                Box::new(inhibitors::xdg::screen_saver::Inhibitor::new().unwrap()),
+            ],
+        }
+    }
+
+    pub fn switch(&mut self) {
         self.on = !self.on;
 
         for i in &mut self.inhibitors {
@@ -35,11 +51,19 @@ impl Tray for Koffee {
         }
     }
 
-    fn icon_name(&self) -> String {
+    fn icon_pixmap(&self) -> Vec<Icon> {
         if self.on {
-            "user-available".into()
+            vec![Icon {
+                width: 32,
+                height: 32,
+                data: Asset::get("on.dbus").unwrap().to_vec(),
+            }]
         } else {
-            "user-offline".into()
+            vec![Icon {
+                width: 32,
+                height: 32,
+                data: Asset::get("off.dbus").unwrap().to_vec(),
+            }]
         }
     }
 
