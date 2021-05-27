@@ -7,8 +7,11 @@ use std::env;
 mod inhibitors;
 mod tray;
 
+const VERSION: &str = env!("CARGO_PKG_VERSION");
+
 fn main() -> Result<()> {
     logging::setup_logging();
+    info!("Koffee-Tray v{}", VERSION);
 
     let args: Vec<String> = env::args().collect();
     let on_startup = args.contains(&("-i".into()));
@@ -22,7 +25,7 @@ fn main() -> Result<()> {
     };
     let service = TrayService::new(koffee);
 
-    info!("Koffee-Tray service starting");
+    info!("Service starting");
     service.run().map_err(|e| anyhow!(e))
 }
 
