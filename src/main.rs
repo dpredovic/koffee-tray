@@ -13,6 +13,12 @@ mod tray;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+#[cfg(debug_assertions)]
+const DEV_MODE: bool = true;
+
+#[cfg(not(debug_assertions))]
+const DEV_MODE: bool = false;
+
 #[derive(Clap)]
 #[clap(version = VERSION)]
 struct Options {
@@ -23,10 +29,13 @@ struct Options {
 }
 
 fn main() -> Result<()> {
-    logging::setup_logging();
-
-    #[cfg(not(debug_assertions))]
-    info!("Koffee-Tray {}", VERSION);
+    let in_shell = get_shell::get_shell().is_ok() || DEV_MODE;
+    if in_shell {
+        simple_logging::setup();
+    } else {
+        syslog_logging::setup();
+        info!("Koffee-Tray {}", VERSION);
+    }
 
     let options: Options = Options::parse();
 
@@ -38,16 +47,14 @@ fn main() -> Result<()> {
         handle.update(tray::Koffee::switch);
     }
 
-    info!("Service starting");
     service.run().map_err(|e| anyhow!(e))
 }
 
-#[cfg(not(debug_assertions))]
-mod logging {
+mod syslog_logging {
     use log::LevelFilter;
     use syslog::{BasicLogger, Facility, Formatter3164};
 
-    pub(crate) fn setup_logging() {
+    pub fn setup() {
         let formatter = Formatter3164 {
             facility: Facility::LOG_USER,
             hostname: None,
@@ -62,11 +69,10 @@ mod logging {
     }
 }
 
-#[cfg(debug_assertions)]
-mod logging {
+mod simple_logging {
     use simple_logger::SimpleLogger;
 
-    pub(crate) fn setup_logging() {
+    pub fn setup() {
         SimpleLogger::new().init().unwrap();
     }
 }
