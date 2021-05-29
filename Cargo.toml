@@ -18,6 +18,7 @@ syslog = "5.0.0"
 simple_logger = "1.11.0"
 anyhow = "1.0.40"
 rust-embed = { version = "5.9.0", features = ["interpolate-folder-path"] }
+clap = "3.0.0-beta.2"
 
 [build-dependencies]
 image = "0.23.14"

@@ -2,6 +2,7 @@ use std::env;
 
 use anyhow::anyhow;
 use anyhow::Result;
+use clap::Clap;
 use ksni::TrayService;
 use log::info;
 
@@ -12,20 +13,28 @@ mod tray;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 
+#[derive(Clap)]
+#[clap(version = VERSION)]
+struct Options {
+    #[clap(short, long)]
+    inhibit: bool,
+    #[clap(short, long)]
+    light_mode: bool,
+}
+
 fn main() -> Result<()> {
     logging::setup_logging();
-    info!("Koffee-Tray v{}", VERSION);
 
-    let args: Vec<String> = env::args().collect();
+    #[cfg(not(debug_assertions))]
+    info!("Koffee-Tray {}", VERSION);
 
-    let light = args.contains(&("-l".into()));
+    let options: Options = Options::parse();
 
-    let koffee = tray::Koffee::new(light);
+    let koffee = tray::Koffee::new(options.light_mode);
     let service: TrayService<Koffee> = TrayService::new(koffee);
     let handle = service.handle();
 
-    let on_startup = args.contains(&("-i".into()));
-    if on_startup {
+    if options.inhibit {
         handle.update(tray::Koffee::switch);
     }
 
