@@ -18,7 +18,9 @@ fn main() -> Result<()> {
 
     let args: Vec<String> = env::args().collect();
 
-    let koffee = tray::Koffee::new();
+    let light = args.contains(&("-l".into()));
+
+    let koffee = tray::Koffee::new(light);
     let service: TrayService<Koffee> = TrayService::new(koffee);
     let handle = service.handle();
 

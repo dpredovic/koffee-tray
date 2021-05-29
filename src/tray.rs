@@ -13,16 +13,18 @@ struct Asset;
 pub struct Koffee {
     pub(crate) on: bool,
     pub(crate) inhibitors: Vec<Box<dyn Inhibitor>>,
+    light_mode: bool,
 }
 
 impl Koffee {
-    pub(crate) fn new() -> Self {
+    pub(crate) fn new(light: bool) -> Self {
         Self {
             on: false,
             inhibitors: vec![
                 Box::new(inhibitors::xdg::power_management::Inhibitor::new().unwrap()),
                 Box::new(inhibitors::xdg::screen_saver::Inhibitor::new().unwrap()),
             ],
+            light_mode: light,
         }
     }
 
@@ -45,26 +47,22 @@ impl Tray for Koffee {
 
     fn title(&self) -> String {
         if self.on {
-            "Koffee is on".into()
+            "Koffee".into()
         } else {
             "No koffee".into()
         }
     }
 
     fn icon_pixmap(&self) -> Vec<Icon> {
-        if self.on {
-            vec![Icon {
-                width: 32,
-                height: 32,
-                data: Asset::get("on.dbus").unwrap().to_vec(),
-            }]
-        } else {
-            vec![Icon {
-                width: 32,
-                height: 32,
-                data: Asset::get("off.dbus").unwrap().to_vec(),
-            }]
-        }
+        let prefix = if self.on { "on" } else { "off" };
+        let suffix = if self.light_mode { "_light" } else { "_dark" };
+        let name = format!("{}{}.dbus", prefix, suffix);
+
+        vec![Icon {
+            width: 32,
+            height: 32,
+            data: Asset::get(name.as_ref()).unwrap().to_vec(),
+        }]
     }
 
     fn menu(&self) -> Vec<MenuItem<Self>> {

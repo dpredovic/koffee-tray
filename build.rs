@@ -41,8 +41,10 @@ fn main() {
         .unwrap();
     assert!(status.success(), "status code = {}", status.code().unwrap());
 
-    serialize_image("on", out_dir.as_ref());
-    serialize_image("off", out_dir.as_ref());
+    serialize_image("on_light", out_dir.as_ref());
+    serialize_image("on_dark", out_dir.as_ref());
+    serialize_image("off_light", out_dir.as_ref());
+    serialize_image("off_dark", out_dir.as_ref());
 
     println!("cargo:rerun-if-changed=build.rs");
 }
