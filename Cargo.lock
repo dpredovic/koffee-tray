@@ -313,7 +313,7 @@ dependencies = [
 
 [[package]]
 name = "koffee-tray"
-version = "0.1.3"
+version = "0.1.4-dev"
 dependencies = [
  "anyhow",
  "bincode2",
