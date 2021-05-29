@@ -47,6 +47,10 @@ fn main() {
     serialize_image("off_dark", out_dir.as_ref());
 
     println!("cargo:rerun-if-changed=build.rs");
+    println!("cargo:rerun-if-changed=assets/on_light.png");
+    println!("cargo:rerun-if-changed=assets/on_dark.png");
+    println!("cargo:rerun-if-changed=assets/off_light.png");
+    println!("cargo:rerun-if-changed=assets/off_dark.png");
 }
 
 fn serialize_image(input: &str, out_dir: &str) {
