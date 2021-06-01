@@ -1,6 +1,6 @@
+use std::{env, fs};
 use std::io::Write;
 use std::process::Command;
-use std::{env, fs};
 
 use xcf::Xcf;
 
@@ -64,8 +64,7 @@ fn serialize_image(input: &str, out_dir: &str) {
     assert_eq!(result.len(), 22 * 22);
 
     let mut file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
-    file.write_all(&[0_u8; 1]).unwrap(); //wtf?
     for x in result {
-        file.write_all(&[x.b(), x.g(), x.r(), x.a()]).unwrap();
+        file.write_all(&[x.a(), x.r(), x.g(), x.b()]).unwrap();
     }
 }
