@@ -1,7 +1,8 @@
+use std::io::Write;
 use std::process::Command;
 use std::{env, fs};
 
-use serde::Serialize;
+use xcf::Xcf;
 
 fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
@@ -47,26 +48,24 @@ fn main() {
     serialize_image("off_dark", out_dir.as_ref());
 
     println!("cargo:rerun-if-changed=build.rs");
-    println!("cargo:rerun-if-changed=assets/on_light.png");
-    println!("cargo:rerun-if-changed=assets/on_dark.png");
-    println!("cargo:rerun-if-changed=assets/off_light.png");
-    println!("cargo:rerun-if-changed=assets/off_dark.png");
+    println!("cargo:rerun-if-changed=assets/on_light.xcf");
+    println!("cargo:rerun-if-changed=assets/on_dark.xcf");
+    println!("cargo:rerun-if-changed=assets/off_light.xcf");
+    println!("cargo:rerun-if-changed=assets/off_dark.xcf");
 }
 
 fn serialize_image(input: &str, out_dir: &str) {
-    let image = image::open(format!("assets/{}.png", input)).unwrap();
-    let image = image.as_rgba8().unwrap();
-    let image = image.as_flat_samples();
-    let image = ImageData {
-        has_alpha: 1,
-        data: image.samples,
-    };
-    let file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
-    bincode2::serialize_into(file, &image).unwrap();
-}
+    let xcf = Xcf::open(format!("assets/{}.xcf", input)).unwrap();
+    assert_eq!(xcf.header.width, 22);
+    assert_eq!(xcf.header.height, 22);
+    assert_eq!(xcf.layers.len(), 1);
+    assert_eq!(xcf.layers[0].width, 22);
+    let result = xcf.layers[0].raw_rgba_buffer().to_vec();
+    assert_eq!(result.len(), 22 * 22);
 
-#[derive(Serialize, Debug)]
-struct ImageData<'a> {
-    has_alpha: u8,
-    data: &'a [u8],
+    let mut file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
+    file.write_all(&[0_u8; 1]).unwrap(); //wtf?
+    for x in result {
+        file.write_all(&[x.b(), x.g(), x.r(), x.a()]).unwrap();
+    }
 }

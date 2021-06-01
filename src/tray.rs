@@ -59,8 +59,8 @@ impl Tray for Koffee {
         let name = format!("{}{}.dbus", prefix, suffix);
 
         vec![Icon {
-            width: 32,
-            height: 32,
+            width: 22,
+            height: 22,
             data: Asset::get(name.as_ref()).unwrap().to_vec(),
         }]
     }
