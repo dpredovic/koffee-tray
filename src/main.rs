@@ -2,7 +2,7 @@ use std::env;
 
 use anyhow::anyhow;
 use anyhow::Result;
-use clap::Clap;
+use clap::Parser;
 use ksni::TrayService;
 use log::info;
 
@@ -19,7 +19,7 @@ const DEV_MODE: bool = true;
 #[cfg(not(debug_assertions))]
 const DEV_MODE: bool = false;
 
-#[derive(Clap)]
+#[derive(Parser)]
 #[clap(version = VERSION)]
 struct Options {
     #[clap(short, long)]
