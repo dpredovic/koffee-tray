@@ -64,6 +64,7 @@ fn serialize_image(input: &str, out_dir: &str) {
 
     let mut file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
     for pixel in pixels {
-        file.write_all(&[pixel.a(), pixel.r(), pixel.g(), pixel.b()]).unwrap();
+        file.write_all(&[pixel.a(), pixel.r(), pixel.g(), pixel.b()])
+            .unwrap();
     }
 }

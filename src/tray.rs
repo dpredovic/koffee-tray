@@ -1,5 +1,5 @@
-use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
 use ksni::{Icon, Tray};
+use ksni::menu::{CheckmarkItem, MenuItem, StandardItem};
 use log::error;
 use rust_embed::RustEmbed;
 
@@ -61,7 +61,7 @@ impl Tray for Koffee {
         vec![Icon {
             width: 22,
             height: 22,
-            data: Asset::get(name.as_ref()).unwrap().to_vec(),
+            data: Asset::get(name.as_ref()).unwrap().data.to_vec(),
         }]
     }
 
@@ -75,15 +75,15 @@ impl Tray for Koffee {
                 activate: Box::new(Self::switch),
                 ..ksni::menu::CheckmarkItem::default()
             }
-            .into(),
-            MenuItem::Sepatator,
+                .into(),
+            MenuItem::Separator,
             StandardItem {
                 label: "Exit".into(),
                 icon_name: "application-exit".into(),
                 activate: Box::new(|_| std::process::exit(0)),
                 ..ksni::menu::StandardItem::default()
             }
-            .into(),
+                .into(),
         ]
     }
 }
