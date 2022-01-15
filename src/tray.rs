@@ -34,7 +34,7 @@ impl Koffee {
         for i in &mut self.inhibitors {
             let result = i.set_inhibit_state(self.on);
             if let Err(err) = result {
-                error!("error: {}", err)
+                error!("error: {}", err);
             }
         }
     }
