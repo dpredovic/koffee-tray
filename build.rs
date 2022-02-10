@@ -16,8 +16,7 @@ fn main() {
                     -d org.freedesktop.PowerManagement.Inhibit \
                     -p /org/freedesktop/PowerManagement/Inhibit \
                     -f org.freedesktop.PowerManagement.Inhibit \
-                    -o {}/xdg_power_management.rs",
-                out_dir
+                    -o {out_dir}/xdg_power_management.rs"
             ),
         ])
         .status()
@@ -34,8 +33,7 @@ fn main() {
                     -d org.freedesktop.ScreenSaver \
                     -p /ScreenSaver \
                     -f org.freedesktop.ScreenSaver \
-                    -o {}/xdg_screen_saver.rs",
-                out_dir
+                    -o {out_dir}/xdg_screen_saver.rs"
             ),
         ])
         .status()
@@ -54,7 +52,7 @@ fn main() {
 }
 
 fn serialize_image(input: &str, out_dir: &str) {
-    let xcf = Xcf::open(format!("assets/{}.xcf", input)).unwrap();
+    let xcf = Xcf::open(format!("assets/{input}.xcf")).unwrap();
     assert_eq!(xcf.layers.len(), 1);
     let layer = &xcf.layers[0];
     assert_eq!(layer.width, 22);
@@ -62,7 +60,7 @@ fn serialize_image(input: &str, out_dir: &str) {
     let pixels = layer.raw_rgba_buffer().to_vec();
     assert_eq!(pixels.len(), 22 * 22);
 
-    let mut file = fs::File::create(format!("{}/{}.dbus", out_dir, input)).unwrap();
+    let mut file = fs::File::create(format!("{out_dir}/{input}.dbus")).unwrap();
     for pixel in pixels {
         file.write_all(&[pixel.a(), pixel.r(), pixel.g(), pixel.b()])
             .unwrap();

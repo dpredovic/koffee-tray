@@ -34,7 +34,7 @@ impl Koffee {
         for i in &mut self.inhibitors {
             let result = i.set_inhibit_state(self.on);
             if let Err(err) = result {
-                error!("error: {}", err);
+                error!("error: {err}");
             }
         }
     }
@@ -56,7 +56,7 @@ impl Tray for Koffee {
     fn icon_pixmap(&self) -> Vec<Icon> {
         let prefix = if self.on { "on" } else { "off" };
         let suffix = if self.light_mode { "_light" } else { "_dark" };
-        let name = format!("{}{}.dbus", prefix, suffix);
+        let name = format!("{prefix}{suffix}.dbus");
 
         vec![Icon {
             width: 22,

@@ -34,7 +34,7 @@ fn main() -> Result<()> {
         simple_logging::setup();
     } else {
         syslog_logging::setup();
-        info!("Koffee-Tray {}", VERSION);
+        info!("Koffee-Tray {VERSION}");
     }
 
     let options: Options = Options::parse();

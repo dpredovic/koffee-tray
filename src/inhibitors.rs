@@ -24,11 +24,13 @@ pub mod xdg {
     }
 
     pub mod power_management {
+        use std::time::Duration;
+
         use anyhow::anyhow;
         use anyhow::Result;
-        use gen::OrgFreedesktopPowerManagementInhibit;
         use log::info;
-        use std::time::Duration;
+
+        use gen::OrgFreedesktopPowerManagementInhibit;
 
         #[allow(clippy::all)]
         mod gen {
@@ -57,14 +59,14 @@ pub mod xdg {
                 if state {
                     let cookie = proxy.inhibit("Koffee-Tray", "Inhibition requested by user")?;
                     self.xdg.cookie = Some(cookie);
-                    info!("xdg PowerManagement inhibited, cookie={}", cookie);
+                    info!("xdg PowerManagement inhibited, cookie={cookie}");
                     Ok(())
                 } else {
                     match self.xdg.cookie {
                         Some(cookie) => {
                             proxy.un_inhibit(cookie)?;
                             self.xdg.cookie = None;
-                            info!("xdg PowerManagement uninhibited, cookie={}", cookie);
+                            info!("xdg PowerManagement uninhibited, cookie={cookie}");
                             Ok(())
                         }
                         None => Err(anyhow!("cookie is None!?")),
@@ -75,10 +77,11 @@ pub mod xdg {
     }
 
     pub mod screen_saver {
+        use std::time::Duration;
+
         use anyhow::anyhow;
         use anyhow::Result;
         use log::info;
-        use std::time::Duration;
 
         use gen::OrgFreedesktopScreenSaver;
 
@@ -109,14 +112,14 @@ pub mod xdg {
                 if state {
                     let cookie = proxy.inhibit("Koffee-Tray", "Inhibition requested by user")?;
                     self.xdg.cookie = Some(cookie);
-                    info!("xdg ScreenSaver inhibited, cookie={}", cookie);
+                    info!("xdg ScreenSaver inhibited, cookie={cookie}");
                     Ok(())
                 } else {
                     match self.xdg.cookie {
                         Some(cookie) => {
                             proxy.un_inhibit(cookie)?;
                             self.xdg.cookie = None;
-                            info!("xdg ScreenSaver uninhibited, cookie={}", cookie);
+                            info!("xdg ScreenSaver uninhibited, cookie={cookie}");
                             Ok(())
                         }
                         None => Err(anyhow!("cookie is None?!")),
