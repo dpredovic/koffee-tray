@@ -73,7 +73,7 @@ impl Tray for Koffee {
                 visible: true,
                 checked: self.on,
                 activate: Box::new(Self::switch),
-                ..ksni::menu::CheckmarkItem::default()
+                ..CheckmarkItem::default()
             }
                 .into(),
             MenuItem::Separator,
@@ -81,7 +81,7 @@ impl Tray for Koffee {
                 label: "Exit".into(),
                 icon_name: "application-exit".into(),
                 activate: Box::new(|_| std::process::exit(0)),
-                ..ksni::menu::StandardItem::default()
+                ..StandardItem::default()
             }
                 .into(),
         ]

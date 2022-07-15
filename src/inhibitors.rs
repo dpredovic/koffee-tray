@@ -50,7 +50,7 @@ pub mod xdg {
         }
 
         impl crate::inhibitors::Inhibitor for Inhibitor {
-            fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
+            fn set_inhibit_state(&mut self, state: bool) -> Result<()> {
                 let proxy = self.xdg.conn.with_proxy(
                     "org.freedesktop.PowerManagement.Inhibit",
                     "/org/freedesktop/PowerManagement/Inhibit",
@@ -103,7 +103,7 @@ pub mod xdg {
         }
 
         impl crate::inhibitors::Inhibitor for Inhibitor {
-            fn set_inhibit_state(&mut self, state: bool) -> super::Result<()> {
+            fn set_inhibit_state(&mut self, state: bool) -> Result<()> {
                 let proxy = self.xdg.conn.with_proxy(
                     "org.freedesktop.ScreenSaver",
                     "/ScreenSaver",

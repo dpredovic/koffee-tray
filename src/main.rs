@@ -39,12 +39,12 @@ fn main() -> Result<()> {
 
     let options: Options = Options::parse();
 
-    let koffee = tray::Koffee::new(options.light_mode);
+    let koffee = Koffee::new(options.light_mode);
     let service: TrayService<Koffee> = TrayService::new(koffee);
     let handle = service.handle();
 
     if options.inhibit {
-        handle.update(tray::Koffee::switch);
+        handle.update(Koffee::switch);
     }
 
     service.run().map_err(|e| anyhow!(e))

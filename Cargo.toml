@@ -12,16 +12,18 @@ publish = false
 
 [profile.release]
 lto = true
+strip = true
+opt-level = "z"
 
 [dependencies]
 ksni = "^0.2.0"
-dbus = "^0.9.5"
-log = "^0.4.14"
+dbus = "^0.9.6"
+log = "^0.4.17"
 syslog = "^6.0.1"
-simple_logger = "^1.16.0"
-anyhow = "^1.0.52"
-rust-embed = { version = "^6.3.0", features = ["interpolate-folder-path"] }
-clap = { version = "^3.0.7", features = ["derive"] }
+simple_logger = "^2.2.0"
+anyhow = "^1.0.58"
+rust-embed = { version = "^6.4.0", features = ["interpolate-folder-path"] }
+clap = { version = "^3.2.12", features = ["derive"] }
 get-shell = "^0.1.0"
 
 [build-dependencies]
