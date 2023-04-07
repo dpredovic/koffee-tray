@@ -17,14 +17,14 @@ opt-level = "z"
 
 [dependencies]
 ksni = "^0.2.0"
-dbus = "^0.9.6"
+dbus = "^0.9.7"
 log = "^0.4.17"
 syslog = "^6.0.1"
-simple_logger = "^2.2.0"
-anyhow = "^1.0.58"
-rust-embed = { version = "^6.4.0", features = ["interpolate-folder-path"] }
-clap = { version = "^3.2.12", features = ["derive"] }
+simple_logger = "^4.1.0"
+anyhow = "^1.0.70"
+rust-embed = { version = "^6.6.1", features = ["interpolate-folder-path"] }
+clap = { version = "^4.2.1", features = ["derive"] }
 get-shell = "^0.1.0"
 
 [build-dependencies]
-xcf = "^0.3.0"
+xcf = "^0.4.0"

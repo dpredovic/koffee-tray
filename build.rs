@@ -8,7 +8,7 @@ fn main() {
     let out_dir = env::var("OUT_DIR").unwrap();
 
     let status = Command::new("fish")
-        .args(&[
+        .args([
             "-c",
             &format!(
                 "dbus-codegen-rust -g \
@@ -24,7 +24,7 @@ fn main() {
     assert!(status.success(), "status code = {}", status.code().unwrap());
 
     let status = Command::new("fish")
-        .args(&[
+        .args([
             "-c",
             &format!(
                 "dbus-codegen-rust \
