@@ -19,11 +19,11 @@ opt-level = "z"
 ksni = "^0.2.0"
 dbus = "^0.9.7"
 log = "^0.4.17"
-syslog = "^6.0.1"
+syslog = "^6.1.0"
 simple_logger = "^4.1.0"
-anyhow = "^1.0.70"
+anyhow = "^1.0.71"
 rust-embed = { version = "^6.6.1", features = ["interpolate-folder-path"] }
-clap = { version = "^4.2.1", features = ["derive"] }
+clap = { version = "^4.2.5", features = ["derive"] }
 get-shell = "^0.1.0"
 
 [build-dependencies]
