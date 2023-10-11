@@ -22,8 +22,8 @@ log = "^0.4.20"
 syslog = "^6.1.0"
 simple_logger = "^4.2.0"
 anyhow = "^1.0.75"
-rust-embed = { version = "^6.8.1", features = ["interpolate-folder-path"] }
-clap = { version = "^4.4.1", features = ["derive"] }
+rust-embed = { version = "^8.0.0", features = ["interpolate-folder-path"] }
+clap = { version = "^4.4.6", features = ["derive"] }
 get-shell = "^0.1.0"
 
 [build-dependencies]
